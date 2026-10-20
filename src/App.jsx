@@ -207,6 +207,7 @@ function App() {
           <a href="#how-it-works">How it works</a>
           <a href="#services">What we deliver</a>
           <a href="#pricing">Pricing</a>
+          <a href="/track">Track my delivery</a>
         </div>
 
         <div className="nav-actions">
@@ -610,6 +611,20 @@ function App() {
                   <span>REFERENCE</span>
                   <strong>{requestNumber}</strong>
                 </div>
+
+                <a
+                  className="request-submit"
+                  href={`/track?ref=${encodeURIComponent(requestNumber)}`}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    marginTop: '16px',
+                  }}
+                >
+                  Track my delivery →
+                </a>
 
                 <div className="success-summary">
                   <div>
