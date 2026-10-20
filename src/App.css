@@ -1711,3 +1711,23 @@ a:focus-visible {
   object-fit: contain;
   border-radius: 6px;
 }
+
+.request-submit-error {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid #efb4a7;
+  border-radius: 12px;
+  background: #fff0eb;
+  color: #8f2f1b;
+}
+
+.request-submit-error strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.request-submit-error p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.92rem;
+}

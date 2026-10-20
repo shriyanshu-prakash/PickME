@@ -88,6 +88,7 @@ function App() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [requestNumber, setRequestNumber] = useState('')
+  const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -127,6 +128,7 @@ function App() {
     }))
     setSubmitted(false)
     setRequestNumber('')
+    setSubmitError('')
     setFormOpen(true)
   }
 
@@ -148,10 +150,12 @@ function App() {
 
     if (submitting) return
 
+    setSubmitError('')
+
     const digits = form.phone.replace(/\D/g, '')
 
     if (digits.length !== 10) {
-      window.alert('Please enter a valid 10-digit mobile number.')
+      setSubmitError('Please enter a valid 10-digit mobile number.')
       return
     }
 
@@ -173,20 +177,44 @@ function App() {
 
     setSubmitting(true)
 
-    const { error } = await supabase
-      .from('delivery_requests')
-      .insert(requestData)
+    try {
+      const { error } = await supabase
+        .from('delivery_requests')
+        .insert(requestData)
 
-    setSubmitting(false)
+      if (error) {
+        console.error('Delivery request failed:', error)
 
-    if (error) {
-      console.error('Delivery request failed:', error)
-      window.alert(`Couldn't save your request: ${error.message}`)
-      return
+        const message = (error.message || '').toLowerCase()
+
+        if (
+          message.includes('orders are disabled for this phone number') ||
+          message.includes('blacklisted')
+        ) {
+          setSubmitError(
+            'This phone number cannot place new delivery requests. Please contact PickMe operations for assistance.'
+          )
+        } else if (message.includes('valid phone number is required')) {
+          setSubmitError('Please enter a valid mobile number.')
+        } else {
+          setSubmitError(
+            'We couldn’t submit your request right now. Please try again. If the problem continues, contact PickMe operations.'
+          )
+        }
+
+        return
+      }
+
+      setRequestNumber(reference)
+      setSubmitted(true)
+    } catch (error) {
+      console.error('Unexpected delivery request error:', error)
+      setSubmitError(
+        'Something went wrong while submitting your request. Please try again.'
+      )
+    } finally {
+      setSubmitting(false)
     }
-
-    setRequestNumber(reference)
-    setSubmitted(true)
   }
 
   return (
@@ -579,6 +607,13 @@ function App() {
                     </label>
                   </div>
 
+                  {submitError && (
+                    <div className="request-submit-error" role="alert">
+                      <strong>Request not submitted</strong>
+                      <p>{submitError}</p>
+                    </div>
+                  )}
+
                   <div className="request-fee">
                     <div>
                       <span>PickMe delivery fee</span>
@@ -650,6 +685,7 @@ function App() {
                     setForm(initialForm)
                     setSubmitted(false)
                     setRequestNumber('')
+                    setSubmitError('')
                     closeForm()
                   }}
                 >
